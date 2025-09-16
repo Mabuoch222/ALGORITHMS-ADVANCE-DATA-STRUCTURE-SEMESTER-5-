@@ -1,0 +1,73 @@
+#include <iostream>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+// Trie Node structure
+class SuffixTrieNode {
+public:
+    unordered_map<char, SuffixTrieNode*> children;
+
+    ~SuffixTrieNode() {
+        for (auto& pair : children)
+            delete pair.second;
+    }
+};
+
+class SuffixTrie {
+private:
+    SuffixTrieNode* root;
+
+public:
+    SuffixTrie(const string& text) {
+        root = new SuffixTrieNode();
+        buildBruteForceSuffixTrie(text);
+    }
+
+    ~SuffixTrie() {
+        delete root;
+    }
+
+    // Brute-force method to insert all suffixes
+    void buildBruteForceSuffixTrie(const string& text) {
+        int n = text.length();
+        for (int i = 0; i < n; ++i) {
+            SuffixTrieNode* current = root;
+            for (int j = i; j < n; ++j) {
+                char c = text[j];
+                if (current->children.find(c) == current->children.end()) {
+                    current->children[c] = new SuffixTrieNode();
+                }
+                current = current->children[c];
+            }
+            // Add terminal symbol (optional)
+            current->children['$'] = nullptr;
+        }
+    }
+
+    // Search if a pattern exists in the trie
+    bool search(const string& pattern) {
+        SuffixTrieNode* current = root;
+        for (char c : pattern) {
+            if (current->children.find(c) == current->children.end())
+                return false;
+            current = current->children[c];
+        }
+        return true;
+    }
+};
+int main() {
+    string text = "banana";
+    SuffixTrie trie(text);
+
+    string pattern;
+    cout << "Enter pattern to search: ";
+    cin >> pattern;
+
+    if (trie.search(pattern))
+        cout << "Pattern found in text." << endl;
+    else
+        cout << "Pattern NOT found in text." << endl;
+
+    return 0;
+}
