@@ -1,0 +1,95 @@
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+class IterativeRandomizedSelect {
+private:
+    int getRandomPivot(int low, int high) {
+        return low + rand() % (high - low + 1);
+    }
+
+    int partition(vector<int>& arr, int low, int high) {
+        int randomIndex = getRandomPivot(low, high);
+        swap(arr[randomIndex], arr[high]);
+        int pivot = arr[high];
+        
+        int i = low - 1;
+        
+        for (int j = low; j < high; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+                swap(arr[i], arr[j]);
+            }
+        }
+        swap(arr[i + 1], arr[high]);
+        return i + 1;
+    }
+
+public:
+    int findIthSmallest(vector<int> arr, int i) {
+        if (i < 1 || i > arr.size()) {
+            throw out_of_range("i must be between 1 and array size");
+        }
+        
+        int low = 0;
+        int high = arr.size() - 1;
+        
+        while (low <= high) {
+            if (low == high) {
+                return arr[low];
+            }
+            
+            int pivotIndex = partition(arr, low, high);
+            int k = pivotIndex - low + 1;
+            
+            if (i == k) {
+                return arr[pivotIndex];
+            } else if (i < k) {
+                high = pivotIndex - 1;
+            } else {
+                low = pivotIndex + 1;
+                i = i - k;
+            }
+        }
+        
+        throw runtime_error("Unexpected error in selection");
+    }
+};
+
+int main() {
+    srand(time(0));
+    
+    IterativeRandomizedSelect selector;
+    
+    // Test with different arrays
+    vector<vector<int>> testArrays = {
+        {12, 3, 5, 7, 4, 19, 26, 1, 8},
+        {64, 34, 25, 12, 22, 11, 90},
+        {5, 2, 8, 2, 9, 1, 5, 5, 2},
+        {1},
+        {9, 8, 7, 6, 5, 4, 3, 2, 1}
+    };
+    
+    for (size_t testIdx = 0; testIdx < testArrays.size(); testIdx++) {
+        vector<int> arr = testArrays[testIdx];
+        
+        cout << "Test " << testIdx + 1 << ": ";
+        for (int num : arr) cout << num << " ";
+        cout << endl;
+        
+        int maxI = min(5, (int)arr.size());
+        for (int i = 1; i <= maxI; i++) {
+            try {
+                int result = selector.findIthSmallest(arr, i);
+                cout << "  " << i << "th smallest: " << result << endl;
+            } catch (const out_of_range& e) {
+                cout << "Error: " << e.what() << endl;
+            }
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}
