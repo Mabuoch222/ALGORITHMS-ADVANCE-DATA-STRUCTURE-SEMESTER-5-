@@ -1,0 +1,97 @@
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <algorithm>
+using namespace std;
+
+class AdvancedRandomizedQuickSort {
+private:
+    int comparisonCount;
+    int swapCount;
+    int recursiveCallCount;
+
+    int getRandomPivot(int low, int high) {
+        return low + rand() % (high - low + 1);
+    }
+
+    int partition(vector<int>& arr, int low, int high) {
+        int randomIndex = getRandomPivot(low, high);
+        swap(arr[randomIndex], arr[high]);
+        swapCount++;
+        int pivot = arr[high];
+        
+        int i = low - 1;
+        
+        for (int j = low; j < high; j++) {
+            comparisonCount++;
+            if (arr[j] <= pivot) {
+                i++;
+                if (i != j) {
+                    swap(arr[i], arr[j]);
+                    swapCount++;
+                }
+            }
+        }
+        if (i + 1 != high) {
+            swap(arr[i + 1], arr[high]);
+            swapCount++;
+        }
+        return i + 1;
+    }
+
+    void quickSort(vector<int>& arr, int low, int high) {
+        recursiveCallCount++;
+        if (low < high) {
+            int pi = partition(arr, low, high);
+            quickSort(arr, low, pi - 1);
+            quickSort(arr, pi + 1, high);
+        }
+    }
+
+public:
+    AdvancedRandomizedQuickSort() : comparisonCount(0), swapCount(0), recursiveCallCount(0) {}
+
+    struct SortResult {
+        int comparisons;
+        int swaps;
+        int recursiveCalls;
+        vector<int> sortedArray;
+    };
+
+    SortResult sort(vector<int> arr) {
+        comparisonCount = 0;
+        swapCount = 0;
+        recursiveCallCount = 0;
+        
+        quickSort(arr, 0, arr.size() - 1);
+        
+        return {comparisonCount, swapCount, recursiveCallCount, arr};
+    }
+};
+
+int main() {
+    srand(time(0));
+    
+    AdvancedRandomizedQuickSort sorter;
+    
+    vector<int> arr = {3, 7, 2, 8, 1, 9, 4, 6, 5, 10, 15, 12, 11, 13, 14};
+    
+    cout << "Original array: ";
+    for (int num : arr) cout << num << " ";
+    cout << endl << endl;
+    
+    auto result = sorter.sort(arr);
+    
+    cout << "Sorted array: ";
+    for (int num : result.sortedArray) cout << num << " ";
+    cout << endl << endl;
+    
+    cout << "=== Performance Statistics ===" << endl;
+    cout << "Number of comparisons: " << result.comparisons << endl;
+    cout << "Number of swaps: " << result.swaps << endl;
+    cout << "Number of recursive calls: " << result.recursiveCalls << endl;
+    cout << "Array size: " << arr.size() << endl;
+    
+    return 0;
+}
